@@ -24,5 +24,9 @@ data class WidgetPreferences(
     val islamicThemeStyle: String = "Emerald",
     val islamicFontSize: Int = 18,
     val islamicTextAlignment: String = "Center",
-    val currentIslamicQuoteId: String? = null
+    val currentIslamicQuoteId: String? = null,
+
+    // Refresh & Automation Settings
+    val refreshIntervalMillis: Long = 3600_000L, // 1 hour default (15m, 30m, 1h, 2h, 6h, 0L for manual)
+    val refreshOnUnlock: Boolean = false          // Default OFF
 )

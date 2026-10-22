@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,6 +45,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -488,7 +490,75 @@ fun QuotelyHomeScreen(viewModel: QuotelyViewModel) {
                 }
             }
 
-            // Section 4: Offline Cache Info
+            // Section 4: Refresh & Automation Settings Card
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Default.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Widget Refresh Interval", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    Text(
+                        text = "Choose how frequently widget content rotates automatically:",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val intervals = listOf(
+                            900_000L to "Every 15 min",
+                            1_800_000L to "Every 30 min",
+                            3_600_000L to "Every 1 hour",
+                            7_200_000L to "Every 2 hours",
+                            21_600_000L to "Every 6 hours",
+                            0L to "Manual only"
+                        )
+                        intervals.forEach { (millis, label) ->
+                            val selected = uiState.preferences.refreshIntervalMillis == millis
+                            FilterChip(
+                                selected = selected,
+                                onClick = { viewModel.updateRefreshInterval(millis) },
+                                label = { Text(label) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = Color.White
+                                )
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = "Refresh on phone unlock", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            Text(text = "Rotate quote when device is unlocked", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Switch(
+                            checked = uiState.preferences.refreshOnUnlock,
+                            onCheckedChange = { viewModel.updateRefreshOnUnlock(it) }
+                        )
+                    }
+                }
+            }
+
+            // Section 5: Offline Cache Info
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
                 shape = RoundedCornerShape(16.dp),
@@ -520,7 +590,7 @@ fun QuotelyHomeScreen(viewModel: QuotelyViewModel) {
                 }
             }
 
-            // Section 5: Widget Setup Guide
+            // Section 6: Widget Setup Guide
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp),

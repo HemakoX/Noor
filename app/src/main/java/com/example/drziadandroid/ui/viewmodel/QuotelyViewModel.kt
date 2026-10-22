@@ -40,6 +40,7 @@ class QuotelyViewModel(application: Application) : AndroidViewModel(application)
 
     init {
         refreshState()
+        WidgetScheduler.schedulePeriodicUpdates(application)
     }
 
     fun refreshState() {
@@ -66,6 +67,27 @@ class QuotelyViewModel(application: Application) : AndroidViewModel(application)
 
     fun setActiveTab(tabIndex: Int) {
         _uiState.update { it.copy(activeTab = tabIndex) }
+    }
+
+    fun updateRefreshInterval(intervalMillis: Long) {
+        viewModelScope.launch {
+            val currentPrefs = repository.getPreferences()
+            repository.savePreferences(currentPrefs.copy(refreshIntervalMillis = intervalMillis))
+            refreshState()
+            WidgetScheduler.schedulePeriodicUpdates(getApplication())
+            val msg = if (intervalMillis == 0L) "Refresh interval set to: Manual only" else "Refresh interval updated successfully"
+            _uiState.update { it.copy(userMessage = msg) }
+        }
+    }
+
+    fun updateRefreshOnUnlock(enabled: Boolean) {
+        viewModelScope.launch {
+            val currentPrefs = repository.getPreferences()
+            repository.savePreferences(currentPrefs.copy(refreshOnUnlock = enabled))
+            refreshState()
+            val msg = if (enabled) "Refresh on phone unlock: Enabled" else "Refresh on phone unlock: Disabled"
+            _uiState.update { it.copy(userMessage = msg) }
+        }
     }
 
     // Default Widget Actions

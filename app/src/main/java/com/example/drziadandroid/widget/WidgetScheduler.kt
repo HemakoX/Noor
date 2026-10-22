@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
+import com.example.drziadandroid.data.repository.QuoteRepository
 
 object WidgetScheduler {
 
@@ -13,9 +14,13 @@ object WidgetScheduler {
 
     fun schedulePeriodicUpdates(context: Context) {
         try {
+            val repository = QuoteRepository(context)
+            val prefs = repository.getPreferences()
+            val interval = prefs.refreshIntervalMillis
+
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
 
-            // Schedule Default Widget Alarms
+            // Default Widget Alarm
             val defaultIntent = Intent(context, DefaultWidgetProvider::class.java).apply {
                 action = ACTION_REFRESH_DEFAULT_WIDGET
             }
@@ -25,14 +30,19 @@ object WidgetScheduler {
                 defaultIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            alarmManager.setInexactRepeating(
-                AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
-                AlarmManager.INTERVAL_HOUR,
-                defaultPendingIntent
-            )
 
-            // Schedule Islamic Widget Alarms
+            alarmManager.cancel(defaultPendingIntent)
+
+            if (interval > 0L) {
+                alarmManager.setInexactRepeating(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + interval,
+                    interval,
+                    defaultPendingIntent
+                )
+            }
+
+            // Islamic Widget Alarm
             val islamicIntent = Intent(context, IslamicWidgetProvider::class.java).apply {
                 action = ACTION_REFRESH_ISLAMIC_WIDGET
             }
@@ -42,12 +52,17 @@ object WidgetScheduler {
                 islamicIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            alarmManager.setInexactRepeating(
-                AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
-                AlarmManager.INTERVAL_HOUR,
-                islamicPendingIntent
-            )
+
+            alarmManager.cancel(islamicPendingIntent)
+
+            if (interval > 0L) {
+                alarmManager.setInexactRepeating(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + interval,
+                    interval,
+                    islamicPendingIntent
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }

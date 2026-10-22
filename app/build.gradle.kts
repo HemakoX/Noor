@@ -20,6 +20,7 @@ android {
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("debug")
             optimization {
                 enable = false
             }
@@ -59,9 +60,9 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    androidTestImplementation(platform(libs.androidx.compose.ui.test.junit4))
+    androidTestImplementation(platform(libs.androidx.espresso.core))
+    androidTestImplementation(platform(libs.androidx.junit))
+    debugImplementation(platform(libs.androidx.compose.ui.test.manifest))
+    debugImplementation(platform(libs.androidx.compose.ui.tooling))
 }

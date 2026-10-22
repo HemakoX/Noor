@@ -61,6 +61,15 @@
                 android:resource="@xml/widget_islamic_info" />
         </receiver>
 
+        <!-- 3. Device Unlock Event Receiver -->
+        <receiver
+            android:name=".widget.DeviceUnlockReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

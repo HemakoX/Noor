@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">Dr ziad android</string>
+    <string name="app_name">Noor</string>
+    <string name="widget_description">Displays inspirational daily quotes and Islamic verses on your home screen.</string>
+    <string name="widget_default_name">Noor - Default Quotes</string>
+    <string name="widget_default_description">Displays inspirational daily quotes on your home screen.</string>
+    <string name="widget_islamic_name">Noor - Islamic (آيات وأحاديث)</string>
+    <string name="widget_islamic_description">Displays authentic Quranic verses and Hadiths in Arabic.</string>
 </resources>

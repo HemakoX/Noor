@@ -1,32 +1,15 @@
 package com.example.drziadandroid.data.api
 
-import android.content.Context
-import com.example.drziadandroid.BuildConfig
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-
-    private lateinit var tokenManager: TokenManager
-    private lateinit var cookieJar: SessionCookieJar
-    private var isInitialized = false
-
-    fun init(context: Context) {
-        if (isInitialized) return
-        tokenManager = TokenManager(context.applicationContext)
-        cookieJar = SessionCookieJar(context.applicationContext)
-        isInitialized = true
-    }
-
-    private fun checkInitialized() {
-        if (!isInitialized) {
-            throw IllegalStateException("RetrofitClient must be initialized in Application.onCreate()")
-        }
-    }
+    private const val BASE_URL = "https://dummyjson.com/"
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -35,44 +18,23 @@ object RetrofitClient {
     }
 
     private val okHttpClient: OkHttpClient by lazy {
-        checkInitialized()
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) {
-                HttpLoggingInterceptor.Level.HEADERS
-            } else {
-                HttpLoggingInterceptor.Level.NONE
-            }
-            // Redact sensitive information
-            redactHeader("Authorization")
-            redactHeader("Cookie")
-            redactHeader("Set-Cookie")
-        }
-
         OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .addInterceptor(AuthInterceptor(tokenManager))
-            .authenticator(TokenAuthenticator(tokenManager, cookieJar, json))
-            .cookieJar(cookieJar)
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
             .build()
     }
 
-    val apiService: ApiService by lazy {
-        checkInitialized()
+    val quoteApiService: QuoteApiService by lazy {
+        val contentType = "application/json".toMediaType()
         Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
+            .baseUrl(BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addConverterFactory(json.asConverterFactory(contentType))
             .build()
-            .create(ApiService::class.java)
-    }
-
-    fun getTokenManager(): TokenManager {
-        checkInitialized()
-        return tokenManager
-    }
-
-    fun clearSession() {
-        checkInitialized()
-        cookieJar.clear()
+            .create(QuoteApiService::class.java)
     }
 }
